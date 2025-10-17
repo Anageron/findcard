@@ -1,13 +1,23 @@
 <script setup>
 import { ref } from "vue";
-
-const flip = ref('Перевернуть');
+const isFlipped = ref(false);
+const status = ref(null);
+const flipText = ref('Перевернуть');
 const word = ref('Карточка');
 const emit = defineEmits(['flip-card', 'check-status'])
 
 function flipCard() {
-  emit('flip-card', 'check-status');
+   isFlipped.value = !isFlipped.value;
+
+  if (isFlipped.value) {
+    flipText.value = 'Перевернуто';
+    emit('flip-card');
+    emit('check-status'); 
+  } else {
+    flipText.value = 'Перевернуть';
+  }
 }
+
 
 </script>
 
@@ -85,4 +95,4 @@ function flipCard() {
   background-color: var(--color-primary-inverted);
   z-index: 1;
 }
-</style>
+</style>  
