@@ -1,11 +1,44 @@
 <script setup>
-  import Button from "./components/Button.vue";
+import { ref } from "vue";
+import Button from "./components/Button.vue";
+import Score from "./components/Score.vue";
+import Card from "./components/Card.vue";
+const hpCount = ref(100);
+
+
 </script>
 
 <template>
-  <Button>
-        Начать игру
-    </Button>
+  <header class="header">
+    Запомни слово
+    <Score :hp-count="hpCount"/>
+  </header>
+  <main class="main"> 
+    <Card />
+    <Button>Начать игру</Button>
+  </main> 
 </template>
 
-<style scoped></style>
+<style scoped>
+
+.header{
+display: flex;
+justify-content: space-between;
+padding: 36px 62px;
+color: var(--color-text-card-action);
+font-family: var(--font-family);
+font-weight: 700;
+font-size: 16px;
+line-height: 150%;
+letter-spacing: 0.12em;
+}
+
+.main{
+  display: flex;
+  flex-direction: column;
+  gap:100px;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+</style>
