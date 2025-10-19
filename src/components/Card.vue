@@ -1,35 +1,70 @@
 <script setup>
 import { ref } from "vue";
-const isFlipped = ref(false);
-const status = ref(null);
-const flipText = ref('Перевернуть');
-const word = ref('Карточка');
-const emit = defineEmits(['flip-card', 'check-status'])
+import closeIcon from "../assets/close.svg";
+import checkIcon from "../assets/check.svg";
 
-function flipCard() {
-   isFlipped.value = !isFlipped.value;
-
-  if (isFlipped.value) {
-    flipText.value = 'Перевернуто';
-    emit('flip-card');
-    emit('check-status'); 
-  } else {
-    flipText.value = 'Перевернуть';
-  }
+const statusImages = {
+  close: closeIcon,
+  check: checkIcon,
 }
 
+const STATUS = {
+  PENDING: null,
+  REJECTED: false,
+  COMPLETED: true,
+};
+
+const cardIndex = ref("01");
+const flipText = ref('Перевернуть');
+const word = ref('Card');
+const statusImage = ref(null);
+const isFlipped = ref(false);
+const status = ref(STATUS.PENDING);
+const emit = defineEmits(['flip-card', 'check-status'])
+
+
+function flipCard() {
+  isFlipped.value = true;
+  word.value = 'Карточка'
+  emit('flip-card');
+}
+
+
+function setStatus(newStatus) {
+  status.value = newStatus;
+  statusImage.value = newStatus ? statusImages.check : statusImages.close;
+  isFlipped.value = false;
+  flipText.value = 'завершено';
+  emit('check-status', status.value);
+}
 
 </script>
 
 
 <template>
-  <div class="card" @click="flipCard">
-    <div class="card__number">
-      01
+  <div class="card" @click.once="flipCard">
+    <div class="card__header">
+      <p class="card__header-number">{{ cardIndex }}</p>
+      <Transition name="fade">
+        <img v-if="status !== STATUS.PENDING" key="icon" class="card__header-image" :src="statusImage"
+          :alt="status === STATUS.COMPLETED ? 'Правильно' : 'Не правильно'" />
+      </Transition>
     </div>
-    <p class="card__word">{{ word }}</p>
+    <Transition name="fade" mode="out-in">
+      <p class="card__word" :key="word">{{ word }}</p>
+    </Transition>
     <div class="card__flip">
-      {{ flip }}
+      <Transition name="fade" mode="out-in">
+        <p v-if="!isFlipped" key="text">{{ flipText }}</p>
+        <div v-else key="buttons" class="card__flip-buttons">
+          <button class="card__button" type="button" @click.stop="setStatus(STATUS.REJECTED)">
+            <img class="card__button-image" :src="statusImages.close" alt="Нет" />
+          </button>
+          <button class="card__button" type="button" @click.stop="setStatus(STATUS.COMPLETED)">
+            <img class="card__button-image" :src="statusImages.check" alt="Да" />
+          </button>
+        </div>
+      </Transition>
     </div>
   </div>
 </template>
@@ -41,7 +76,7 @@ function flipCard() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 140px;
+  gap: 133px;
   width: 250px;
   border-radius: 16px;
   background-color: var(--color-primary-inverted);
@@ -62,13 +97,27 @@ function flipCard() {
   box-shadow: 0 0 16px 0 rgba(0, 0, 0, 0.1);
 }
 
-.card__number {
+.card__header {
+  display: flex;
   align-self: flex-start;
-  margin-block-start: 20px;
+  gap: 50px;
+  align-items: center;
+  padding-block-start: 4px;
   margin-inline-start: 35px;
   font-weight: 400;
   font-size: 14px;
   z-index: 1;
+  min-height: 51px;
+}
+
+.card__header-number {
+  background-color: var(--color-primary-inverted);
+}
+
+.card__header-image {
+  width: 39px;
+  height: 39px;
+  margin: 4px;
   background-color: var(--color-primary-inverted);
 }
 
@@ -76,14 +125,14 @@ function flipCard() {
   font-weight: 400;
   font-size: 18px;
   text-transform: lowercase;
-
 }
 
 .card__flip {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-block-end: 20px;
+  margin-block-end: 14px;
+  min-height: 24px;
   gap: 32px;
   padding-inline: 8px;
   font-weight: 700;
@@ -95,4 +144,38 @@ function flipCard() {
   background-color: var(--color-primary-inverted);
   z-index: 1;
 }
-</style>  
+
+.card__button {
+  display: flex;
+  width: 24px;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.card__button-image {
+  width: 20px;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.card__flip-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding-inline: 8px;
+}
+</style>
