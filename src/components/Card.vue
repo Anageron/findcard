@@ -1,41 +1,68 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import closeIcon from "../assets/close.svg";
 import checkIcon from "../assets/check.svg";
 
-const statusImages = {
-  close: closeIcon,
-  check: checkIcon,
-}
-
 const STATUS = {
-  PENDING: null,
-  REJECTED: false,
-  COMPLETED: true,
+  PENDING: "pending",
+  REJECTED: "fail",
+  COMPLETED: "success",
 };
 
+const statusImages = {
+  [STATUS.REJECTED]: closeIcon,
+  [STATUS.COMPLETED]: checkIcon,
+}
+
+
+const props = defineProps({
+  word: {
+    type: String,
+    required: true
+  },
+  translation: {
+    type: String,
+    required: true
+  },
+  state: {
+    type: String,
+    required: true
+  },
+  status: {
+    type: String,
+    required: true
+  }
+})
+
+
+const emit = defineEmits(['update:state', 'update:status'])
+
+const displayedWord = computed(() => {
+  return props.state === 'opened' ? props.translation : props.word;
+});
+
+const flipText = computed(() => {
+  return props.state === 'opened' ? 'Закрыть' : 'Перевернуть';
+})
+
+const statusImage = computed(() => {
+  return statusImages[props.status] || null;
+});
+
 const cardIndex = ref("01");
-const flipText = ref('Перевернуть');
-const word = ref('Card');
-const statusImage = ref(null);
-const isFlipped = ref(false);
-const status = ref(STATUS.PENDING);
-const emit = defineEmits(['flip-card', 'check-status'])
+
 
 
 function flipCard() {
-  isFlipped.value = true;
-  word.value = 'Карточка'
-  emit('flip-card');
+  if (props.status !== 'pending' || props.state !== 'closed') return;
+  emit('update:state', 'opened');
 }
 
 
-function setStatus(newStatus) {
-  status.value = newStatus;
-  statusImage.value = newStatus ? statusImages.check : statusImages.close;
-  isFlipped.value = false;
-  flipText.value = 'завершено';
-  emit('check-status', status.value);
+function setStatus(isCorrect) {
+  if (props.status !== 'pending' || props.state !== 'opened') return;
+  const newStatus = isCorrect ? STATUS.COMPLETED : STATUS.REJECTED;
+  emit('update:status', newStatus);
 }
 
 </script>
@@ -46,22 +73,24 @@ function setStatus(newStatus) {
     <div class="card__header">
       <p class="card__header-number">{{ cardIndex }}</p>
       <Transition name="fade">
-        <img v-if="status !== STATUS.PENDING" key="icon" class="card__header-image" :src="statusImage"
+        <img 
+          v-if="props.status !== STATUS.PENDING" 
+          class="card__header-image" :src="statusImage"
           :alt="status === STATUS.COMPLETED ? 'Правильно' : 'Не правильно'" />
       </Transition>
     </div>
     <Transition name="fade" mode="out-in">
-      <p class="card__word" :key="word">{{ word }}</p>
+      <p :key="displayedWord" class="card__word">{{ displayedWord }}</p>
     </Transition>
     <div class="card__flip">
       <Transition name="fade" mode="out-in">
-        <p v-if="!isFlipped" key="text">{{ flipText }}</p>
-        <div v-else key="buttons" class="card__flip-buttons">
+        <p v-if="state === 'closed' && status === 'pending'">{{ flipText }}</p>
+        <div v-else-if="state === 'opened' && status === 'pending'" key="buttons" class="card__flip-buttons">
           <button class="card__button" type="button" @click.stop="setStatus(STATUS.REJECTED)">
-            <img class="card__button-image" :src="statusImages.close" alt="Нет" />
+            <img class="card__button-image" :src="closeIcon" alt="Нет" />
           </button>
           <button class="card__button" type="button" @click.stop="setStatus(STATUS.COMPLETED)">
-            <img class="card__button-image" :src="statusImages.check" alt="Да" />
+            <img class="card__button-image" :src="checkIcon" alt="Да" />
           </button>
         </div>
       </Transition>

@@ -3,7 +3,14 @@ import { ref } from "vue";
 import Button from "./components/Button.vue";
 import Score from "./components/Score.vue";
 import Card from "./components/Card.vue";
+
 const hpCount = ref(100);
+const cardInfo = ref({
+  word: 'Card',
+  translation: 'Карточка',
+  state: 'closed',
+  status: 'pending'
+})
 
 
 </script>
@@ -14,7 +21,11 @@ const hpCount = ref(100);
     <Score :hp-count="hpCount"/>
   </header>
   <main class="main"> 
-    <Card />
+    <Card 
+      v-bind="cardInfo"
+      @update:state="value => cardInfo.state = value"
+      @update:status="value => cardInfo.status = value"
+    />
     <Button>Начать игру</Button>
   </main> 
 </template>
