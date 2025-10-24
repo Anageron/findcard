@@ -1,6 +1,6 @@
 <script setup>
 defineProps({
-  hpCount: {
+  healthCount: {
     type: Number,
     required: true
   }
@@ -9,7 +9,7 @@ defineProps({
 
 <template>
   <div class="header__score">
-    <span>{{ hpCount }}</span>
+    <span>{{ healthCount }}</span>
     <img class="icon" src="../assets/heart.svg" alt="" />
   </div>
 </template>
