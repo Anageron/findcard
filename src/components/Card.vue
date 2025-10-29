@@ -54,7 +54,7 @@ const statusImage = computed(() => {
 });
 
 const cardIndex = computed(() => {
-  return props.index < 10 ? `0${props.index+1}` : props.index+1
+  return props.index < 9 ? `0${props.index + 1}` : props.index + 1
 });
 
 
@@ -77,13 +77,11 @@ function setStatus(isCorrect) {
 
 
 <template>
-  <div class="card" @click.once="flipCard">
+  <div class="card" @click="flipCard">
     <div class="card__header">
       <p class="card__header-number">{{ cardIndex }}</p>
       <Transition name="fade">
-        <img 
-          v-if="props.status !== STATUS.PENDING" 
-          class="card__header-image" :src="statusImage"
+        <img v-if="props.status !== STATUS.PENDING" class="card__header-image" :src="statusImage"
           :alt="status === STATUS.COMPLETED ? 'Правильно' : 'Не правильно'" />
       </Transition>
     </div>

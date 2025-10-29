@@ -1,38 +1,49 @@
 <script setup>
-import { ref } from "vue";
+import { nextTick, onMounted, ref } from "vue";
 import Button from "./components/Button.vue";
 import Score from "./components/Score.vue";
 import Card from "./components/Card.vue";
 
 const healthCount = ref(100);
-const cardInfo = ref([{
-  word: 'Card',
-  translation: 'Карточка',
-  state: 'closed',
-  status: 'pending'
-},
-{
-  word: 'Word',
-  translation: 'Слово',
-  state: 'closed',
-  status: 'pending'
+const cards = ref([]);
+const gameKey = ref(0);
 
-},
-{
-  word: 'Car',
-  translation: 'Машина',
-  state: 'closed',
-  status: 'pending'
+onMounted(()=>getData() )
 
-},
-{
-  word: 'Door',
-  translation: 'Дверь',
-  state: 'closed',
-  status: 'pending'
+async function getData() {
+  gameKey.value += 1;
+  try {
+    const res = await fetch('http://localhost:8080/api/random-words');
+    if (!res.ok) throw new Error('Не удалось загрузить слова');
+    const rawData = await res.json();
+    
+    cards.value = (Array.isArray(rawData) ? rawData : []).map(item => ({
+      word: item.word || '',
+      translation: item.translation || '',
+      state: 'closed',   
+      status: 'pending' 
+    }));
+  } catch (err) {
+    console.error(err);
+    cards.value = [];
+  }
 
 }
-])
+function updateCardState(index, newState) {
+  if (cards.value[index]) {
+    cards.value[index].state = newState;
+  }
+  
+}
+
+function updateCardStatus(index, newStatus) {
+  if (cards.value[index]) {
+    cards.value[index].status = newStatus;
+    healthCount.value = newStatus === "fail"
+      ? Math.max(0, healthCount.value - 10)
+      : Math.min(1000, healthCount.value + 4);
+  }
+}
 
 
 </script>
@@ -43,13 +54,16 @@ const cardInfo = ref([{
     <Score :health-count="healthCount" />
   </header>
   <main class="main">
-    <section class="cards"> 
+    <section class="cards">
       <Card 
-        v-for="(card, index) in cardInfo" :key="index" v-bind="card" :index="index"
-        @update:state="value => cardInfo[index].state = value"
-        @update:status="value => cardInfo[index].status = value" />
+        v-for="(card, index) in cards" 
+        :key="`${gameKey}-${index}`"
+        v-bind="card" 
+        :index="index"
+        @update:state="value => updateCardState(index, value)"
+        @update:status="value => updateCardStatus(index, value)" />
     </section>
-    <Button>Начать игру</Button>
+    <Button @click="getData()" >Начать игру</Button>
   </main>
 </template>
 
@@ -73,14 +87,14 @@ const cardInfo = ref([{
   gap: 100px;
   justify-content: center;
   align-items: center;
-  
+
 }
 
 .cards {
   display: flex;
-  
+
   gap: 100px;
   flex-wrap: wrap;
-  
+
 }
 </style>
