@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { computed } from "vue";
 import closeIcon from "../assets/close.svg";
 import checkIcon from "../assets/check.svg";
 
@@ -31,7 +31,11 @@ const props = defineProps({
   status: {
     type: String,
     required: true
-  }
+  },
+  index: {
+    type: Number,
+    required: true
+  },
 })
 
 
@@ -49,7 +53,11 @@ const statusImage = computed(() => {
   return statusImages[props.status] || null;
 });
 
-const cardIndex = ref("01");
+const cardIndex = computed(() => {
+  return props.index < 9 ? `0${props.index + 1}` : props.index + 1
+});
+
+
 
 
 
@@ -61,7 +69,7 @@ function flipCard() {
 
 function setStatus(isCorrect) {
   if (props.status !== 'pending' || props.state !== 'opened') return;
-  const newStatus = isCorrect ? STATUS.COMPLETED : STATUS.REJECTED;
+  const newStatus = isCorrect === "success" ? STATUS.COMPLETED : STATUS.REJECTED;
   emit('update:status', newStatus);
 }
 
@@ -69,13 +77,11 @@ function setStatus(isCorrect) {
 
 
 <template>
-  <div class="card" @click.once="flipCard">
+  <div class="card" @click="flipCard">
     <div class="card__header">
       <p class="card__header-number">{{ cardIndex }}</p>
       <Transition name="fade">
-        <img 
-          v-if="props.status !== STATUS.PENDING" 
-          class="card__header-image" :src="statusImage"
+        <img v-if="props.status !== STATUS.PENDING" class="card__header-image" :src="statusImage"
           :alt="status === STATUS.COMPLETED ? 'Правильно' : 'Не правильно'" />
       </Transition>
     </div>
