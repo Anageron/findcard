@@ -40,8 +40,8 @@ function updateCardStatus(index, newStatus) {
   if (cards.value[index]) {
     cards.value[index].status = newStatus;
     healthCount.value = newStatus === "fail"
-      ? Math.max(0, healthCount.value - 10)
-      : Math.min(1000, healthCount.value + 4);
+      ? Math.max(0, healthCount.value - 4)
+      : Math.min(1000, healthCount.value + 10);
   }
 }
 

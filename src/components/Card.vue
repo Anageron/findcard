@@ -12,77 +12,73 @@ const STATUS = {
 const statusImages = {
   [STATUS.REJECTED]: closeIcon,
   [STATUS.COMPLETED]: checkIcon,
-}
-
+};
 
 const props = defineProps({
   word: {
     type: String,
-    required: true
+    required: true,
   },
   translation: {
     type: String,
-    required: true
+    required: true,
   },
   state: {
     type: String,
-    required: true
+    required: true,
   },
   status: {
     type: String,
-    required: true
+    required: true,
   },
   index: {
     type: Number,
-    required: true
+    required: true,
   },
-})
+});
 
-
-const emit = defineEmits(['update:state', 'update:status'])
+const emit = defineEmits(["update:state", "update:status"]);
 
 const displayedWord = computed(() => {
-  return props.state === 'opened' ? props.translation : props.word;
+  return props.state === "opened" ? props.translation : props.word;
 });
 
 const flipText = computed(() => {
-  return props.state === 'opened' ? 'Закрыть' : 'Перевернуть';
-})
+  return props.state === "opened" ? "Закрыть" : "Перевернуть";
+});
 
 const statusImage = computed(() => {
   return statusImages[props.status] || null;
 });
 
 const cardIndex = computed(() => {
-  return props.index < 9 ? `0${props.index + 1}` : props.index + 1
+  return props.index < 9 ? `0${props.index + 1}` : props.index + 1;
 });
 
-
-
-
-
 function flipCard() {
-  if (props.status !== 'pending' || props.state !== 'closed') return;
-  emit('update:state', 'opened');
+  if (props.status !== "pending" || props.state !== "closed") return;
+  emit("update:state", "opened");
 }
-
 
 function setStatus(isCorrect) {
-  if (props.status !== 'pending' || props.state !== 'opened') return;
-  const newStatus = isCorrect === "success" ? STATUS.COMPLETED : STATUS.REJECTED;
-  emit('update:status', newStatus);
+  if (props.status !== "pending" || props.state !== "opened") return;
+  const newStatus =
+    isCorrect === "success" ? STATUS.COMPLETED : STATUS.REJECTED;
+  emit("update:status", newStatus);
 }
-
 </script>
-
 
 <template>
   <div class="card" @click="flipCard">
     <div class="card__header">
       <p class="card__header-number">{{ cardIndex }}</p>
       <Transition name="fade">
-        <img v-if="props.status !== STATUS.PENDING" class="card__header-image" :src="statusImage"
-          :alt="status === STATUS.COMPLETED ? 'Правильно' : 'Не правильно'" />
+        <img
+          v-if="props.status !== STATUS.PENDING"
+          class="card__header-image"
+          :src="statusImage"
+          :alt="status === STATUS.COMPLETED ? 'Правильно' : 'Не правильно'"
+        />
       </Transition>
     </div>
     <Transition name="fade" mode="out-in">
@@ -91,11 +87,23 @@ function setStatus(isCorrect) {
     <div class="card__flip">
       <Transition name="fade" mode="out-in">
         <p v-if="state === 'closed' && status === 'pending'">{{ flipText }}</p>
-        <div v-else-if="state === 'opened' && status === 'pending'" key="buttons" class="card__flip-buttons">
-          <button class="card__button" type="button" @click.stop="setStatus(STATUS.REJECTED)">
+        <div
+          v-else-if="state === 'opened' && status === 'pending'"
+          key="buttons" 
+          class="card__flip-buttons"
+        >
+          <button
+            class="card__button"
+            type="button"
+            @click.stop="setStatus(STATUS.REJECTED)"
+          >
             <img class="card__button-image" :src="closeIcon" alt="Нет" />
           </button>
-          <button class="card__button" type="button" @click.stop="setStatus(STATUS.COMPLETED)">
+          <button
+            class="card__button"
+            type="button"
+            @click.stop="setStatus(STATUS.COMPLETED)"
+          >
             <img class="card__button-image" :src="checkIcon" alt="Да" />
           </button>
         </div>
@@ -119,7 +127,7 @@ function setStatus(isCorrect) {
 }
 
 .card::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 28px 20px;
   border: 1px solid var(--color-card-edging);
